@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('year');
             $table->string('img')->nullable();
             $table->unsignedBigInteger('energie_id'); // Ajout de la colonne pour la clé étrangère
-            $table->foreign('energie_id')->references('id')->on('energie');
+            $table->foreign('energie_id')->references('id')->on('energies');
             // Définition de la contrainte de clé étrangère
         });
     }

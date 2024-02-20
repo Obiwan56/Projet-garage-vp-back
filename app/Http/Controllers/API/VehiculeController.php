@@ -8,66 +8,115 @@ use Illuminate\Http\Request;
 
 class VehiculeController extends Controller
 {
-    // Récupérer un enregistrement de la table vehicule avec son id
+    // Méthode pour obtenir les messages communs
+    private function getMessage(string $messageKey): string {
+        // Tableau associatif des messages avec des clés
+        $messages = [
+            'vehiculeNotFound' => 'Véhicule non trouvé.',
+            'vehiculeSaved' => 'Véhicule enregistré avec succès.',
+            'vehiculeUpdated' => 'Véhicule mis à jour avec succès.',
+            'vehiculeDeleted' => 'Véhicule supprimé avec succès.',
+        ];
+        // Retourne le message correspondant à la clé
+        return $messages[$messageKey];
+    }
+
+    // Méthode pour afficher un véhicule par son ID
     public function show(int $id) {
+        // Recherche du véhicule par son ID
         $vehicule = Vehicule::find($id);
+        // Vérification si le véhicule existe
         if ($vehicule) {
+            // Retourne le véhicule s'il est trouvé
             return $vehicule;
         } else {
-            return response()->json(['message' => 'Véhicule non trouvé.'], 404);
+            // Retourne une réponse JSON avec un message d'erreur s'il n'est pas trouvé
+            return response()->json(['message' => $this->getMessage('vehiculeNotFound')], 404);
         }
     }
 
-    // Enregistrement d'un véhicule
+    // Méthode pour enregistrer un nouveau véhicule
     public function store(Request $request) {
-        $request->validate([
+        // Validation des données entrantes
+        $validatedData = $request->validate([
             'marque' => 'required',
             'model' => 'required',
             'prix' => 'required',
             'km' => 'required',
             'description' => 'required',
-            'year' => 'required',
-            'img' => 'required',
+            'year' => 'required|date',
+            'energie_id' => 'required|exists:energie,id',
         ]);
 
-        Vehicule::create($request->all());
-        return response()->json(['message' => 'Véhicule enregistré avec succès.'], 201);
+        // Création d'une nouvelle instance de véhicule et assignation des données validées
+        $vehicule = new Vehicule;
+        $vehicule->marque = $validatedData['marque'];
+        $vehicule->model = $validatedData['model'];
+        $vehicule->prix = $validatedData['prix'];
+        $vehicule->km = $validatedData['km'];
+        $vehicule->description = $validatedData['description'];
+        $vehicule->year = $validatedData['year'];
+        $vehicule->energie_id = $validatedData['energie_id'];
+        $vehicule->save();
+
+        // Retourne une réponse JSON avec un message de succès
+        return response()->json(['message' => $this->getMessage('vehiculeSaved')], 201);
     }
 
-    // Mise à jour d'un véhicule
+    // Méthode pour mettre à jour un véhicule existant
     public function update(Request $request, int $id) {
-        $request->validate([
+        // Recherche du véhicule par son ID
+        $vehicule = Vehicule::find($id);
+        // Vérification si le véhicule existe
+        if (!$vehicule) {
+            // Retourne une réponse JSON avec un message d'erreur s'il n'est pas trouvé
+            return response()->json(['message' => $this->getMessage('vehiculeNotFound')], 404);
+        }
+
+        // Validation des données entrantes
+        $validatedData = $request->validate([
             'marque' => 'required',
             'model' => 'required',
             'prix' => 'required',
             'km' => 'required',
             'description' => 'required',
-            'year' => 'required',
-            'img' => 'required',
+            'year' => 'required|date',
+            'energie_id' => 'required|exists:energie,id',
         ]);
 
-        $vehicule = Vehicule::find($id);
-        if ($vehicule) {
-            $vehicule->update($request->all());
-            return response()->json(['message' => 'Véhicule mis à jour avec succès.']);
-        } else {
-            return response()->json(['message' => 'Véhicule non trouvé.'], 404);
-        }
+        // Assignation des données validées au véhicule
+        $vehicule->marque = $validatedData['marque'];
+        $vehicule->model = $validatedData['model'];
+        $vehicule->prix = $validatedData['prix'];
+        $vehicule->km = $validatedData['km'];
+        $vehicule->description = $validatedData['description'];
+        $vehicule->year = $validatedData['year'];
+        $vehicule->energie_id = $validatedData['energie_id'];
+        $vehicule->save();
+
+        // Retourne une réponse JSON avec un message de succès
+        return response()->json(['message' => $this->getMessage('vehiculeUpdated')]);
     }
 
-    // Récupération de tous les véhicules
+    // Méthode pour récupérer tous les véhicules
     public function all() {
+        // Récupération de tous les véhicules dans la base de données
         return Vehicule::all();
     }
 
-    // Suppression d'un véhicule
-    public function delete(int $id)  {
+    // Méthode pour supprimer un véhicule
+    public function delete(int $id) {
+        // Recherche du véhicule par son ID
         $vehicule = Vehicule::find($id);
+        // Vérification si le véhicule existe
         if ($vehicule) {
+            // Suppression du véhicule de la base de données
             $vehicule->delete();
-            return response()->json(['message' => 'Véhicule supprimé avec succès.']);
+            // Retourne une réponse JSON avec un message de succès
+            return response()->json(['message' => $this->getMessage('vehiculeDeleted')]);
         } else {
-            return response()->json(['message' => 'Véhicule non trouvé.'], 404);
+            // Retourne une réponse JSON avec un message d'erreur s'il n'est pas trouvé
+            return response()->json(['message' => $this->getMessage('vehiculeNotFound')], 404);
         }
     }
 }

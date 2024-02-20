@@ -8,13 +8,19 @@ use Illuminate\Http\Request;
 
 class CommentaireController extends Controller
 {
+    // Constantes pour les messages récurrents
+    const MESSAGE_NOT_FOUND = 'Commentaire non trouvé.';
+    const MESSAGE_SUCCESS_STORE = 'Commentaire enregistré avec succès.';
+    const MESSAGE_SUCCESS_UPDATE = 'Commentaire mis à jour avec succès.';
+    const MESSAGE_SUCCESS_DELETE = 'Commentaire supprimé avec succès.';
+
     // Récupérer un enregistrement de la table commentaire avec son id
     public function show(int $id) {
         $commentaire = Commentaire::find($id);
         if ($commentaire) {
             return $commentaire;
         } else {
-            return response()->json(['message' => 'commentaire non trouvé.'], 404);
+            return response()->json(['message' => self::MESSAGE_NOT_FOUND], 404);
         }
     }
 
@@ -29,7 +35,7 @@ class CommentaireController extends Controller
         ]);
 
         Commentaire::create($request->all());
-        return response()->json(['message' => 'commentaire enregistré avec succès.'], 201);
+        return response()->json(['message' => self::MESSAGE_SUCCESS_STORE], 201);
     }
 
     // Mise à jour d'un commentaire
@@ -45,9 +51,9 @@ class CommentaireController extends Controller
         $commentaire = Commentaire::find($id);
         if ($commentaire) {
             $commentaire->update($request->all());
-            return response()->json(['message' => 'commentaire mis à jour avec succès.']);
+            return response()->json(['message' => self::MESSAGE_SUCCESS_UPDATE]);
         } else {
-            return response()->json(['message' => 'commentaire non trouvé.'], 404);
+            return response()->json(['message' => self::MESSAGE_NOT_FOUND], 404);
         }
     }
 
@@ -61,9 +67,9 @@ class CommentaireController extends Controller
         $commentaire = Commentaire::find($id);
         if ($commentaire) {
             $commentaire->delete();
-            return response()->json(['message' => 'commentaire supprimé avec succès.']);
+            return response()->json(['message' => self::MESSAGE_SUCCESS_DELETE]);
         } else {
-            return response()->json(['message' => 'commentaire non trouvé.'], 404);
+            return response()->json(['message' => self::MESSAGE_NOT_FOUND], 404);
         }
     }
 }
